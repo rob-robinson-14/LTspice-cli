@@ -33,10 +33,7 @@ def run_simulation_recursive(parameter_set_array=None, numerical_name_start=0):
                 print('Setting parameter:  ' + str(parameter) + '=' + str(parameter_value))
                 
                 set_parameters(asc_file_path, parameter, parameter_value, True)
-                if len(parameter_set_array[1:][0][0]) > 1:
-                    output_filenames.extend(run_simulation_recursive([parameter_set_array[0][1:],parameter_set_array[1][1:]], numerical_name_start))
-                else:
-                    output_filenames.extend(run_simulation_recursive([parameter_set_array[0], [parameter_set_array[1:][0][0][1:],parameter_set_array[1][1:]]],numerical_name_start))
+                output_filenames.extend(run_simulation_recursive([parameter_set_array[0][1:],parameter_set_array[1][1:]], numerical_name_start))   
             else:
                 output_filenames.extend(run_simulations([parameter_set_array[0][0],parameter_set_array[1][0]], numerical_name_start))
                 return output_filenames
