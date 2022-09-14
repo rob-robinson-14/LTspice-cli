@@ -10,17 +10,23 @@ except ImportError:
 def simulate(filename=None, do_analysis=False):
 
     asc_file_path = config.LTSpice_asc_filename
+    run_requested = False
 
     if filename is not None:
+        
+        parameter_values_array = []
+        parameters_array = []
         # Parse the file containing the parameters
         command_list = simulation_tools.parse_parameter_file(filename)
-
+        
         # Run the list of commands
         number_of_finished_simulations = 0
         all_filenames = []
         if command_list is None:
             print('Syntax error in parameter file.')
             return
+        
+        # Set all parameters that remain constant 
         for command in command_list:
             if command[0] == 's':
                 parameter = command[1]
@@ -28,16 +34,22 @@ def simulate(filename=None, do_analysis=False):
                 # Set parameter as specified
                 print('Setting parameter:  ' + str(parameter) + '=' + str(value))
                 simulation_tools.set_parameters(asc_file_path, parameter, value, True)
-            if command[0] == 'r':
-                parameter = command[1]
-                parameter_values = command[2]
-                # Run tests with the given parameter and corresponding list of parameter values
-                # The filenames of the output data is returned
-                filenames = simulation_tools.run_simulations([parameter, parameter_values], number_of_finished_simulations)
-                all_filenames.extend(filenames)
-                number_of_finished_simulations += len(parameter_values)
-                if do_analysis:
-                    analyze(filenames)
+            
+            elif command[0] == 'r':
+                parameters_array.append(command[1]) 
+                parameter_values_array.append(command[2])
+                run_requested = True
+        
+
+        
+        if run_requested:
+            # Run tests with the given parameter and corresponding list of parameter values
+            # The filenames of the output data is returned
+            filenames = simulation_tools.run_simulation_recursive([parameters_array, parameter_values_array], number_of_finished_simulations)
+            all_filenames.extend(filenames)
+            number_of_finished_simulations += len(parameter_values_array)
+            if do_analysis:
+                analyze(filenames)
 
         # If analysis made, make a report with all the analysied data
         if do_analysis:
@@ -52,7 +64,7 @@ def analyze(filenames):
         analysis_tools.analyze_data(filename)
 
 def help():
-    print 'auto.py -r -f <parameterFile> -a\nUsing the option -a to analyze, requires -f to be set'
+    print ('auto.py -r -f <parameterFile> -a\nUsing the option -a to analyze, requires -f to be set')
 
 def main(argv):
 

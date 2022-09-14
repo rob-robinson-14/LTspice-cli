@@ -9,6 +9,40 @@ import config
 
 # ----------- Simulation controls ----------- #
 
+def run_simulation_recursive(parameter_set_array=None, numerical_name_start=0):
+    
+    # Specify file paths
+    asc_file_path = config.LTSpice_asc_filename
+
+    # Create a list of the generated files
+    output_filenames = []
+    
+    
+    for idx , parameter_set in enumerate(parameter_set_array[1][0]):
+        
+    # Set appropriate variables according to the argument of parameter_set
+        if parameter_set is not None:
+            parameter = parameter_set_array[0][0]
+            parameter_value_list = parameter_set_array[1][0]
+            parameter_value = parameter_value_list[idx]
+            use_default_parameters = False
+            numerical_name_start = len(output_filenames) + numerical_name_start
+            
+            if len(parameter_set_array[0]) > 1:
+                
+                print('Setting parameter:  ' + str(parameter) + '=' + str(parameter_value))
+                
+                set_parameters(asc_file_path, parameter, parameter_value, True)
+                if len(parameter_set_array[1:][0][0]) > 1:
+                    output_filenames.extend(run_simulation_recursive([parameter_set_array[0][1:],parameter_set_array[1][1:]], numerical_name_start))
+                else:
+                    output_filenames.extend(run_simulation_recursive([parameter_set_array[0], [parameter_set_array[1:][0][0][1:],parameter_set_array[1][1:]]],numerical_name_start))
+            else:
+                output_filenames.extend(run_simulations([parameter_set_array[0][0],parameter_set_array[1][0]], numerical_name_start))
+                return output_filenames
+        
+    return output_filenames
+            
 def run_simulations(parameter_set=None, numerical_name_start=0):
 
     # Set appropriate variables according to the argument of parameter_set

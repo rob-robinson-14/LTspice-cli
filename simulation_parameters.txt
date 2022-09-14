@@ -1,8 +1,9 @@
 # This a comment
 
 # First simulation run
-set R 500
+run R 500 1000
 run C 1n 2n 3n
+run Von 5 10 15
 
 # Second simulation run
 # run C 1n 2n 3n
